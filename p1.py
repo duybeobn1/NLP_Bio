@@ -81,10 +81,3 @@ batch_size = 10
 dataset = EmotionDataset(train_texts, train_emotions, vocab, classes, max_len=max_sequence_length)
 dataloader = DataLoader(dataset, batch_size=batch_size, shuffle=True)
 
-
-for inputs, targets in dataloader:
-    print("Inputs (batch_size, seq_len, vocab_size):", inputs.shape)
-    print("Targets (batch_size):", targets.shape)
-    print("Targets (sample values):", targets[:3])
-    break
-
