@@ -29,10 +29,6 @@ def load_file(file):
                 emotions.append(emotion)
     return texts, emotions
 
-# Data loading
-train_texts, train_emotions = load_file("./dataset/train.txt")
-
-
 class EmotionDataset(Dataset):
     def __init__(self, texts, emotions, max_len=20):
         self.texts = texts
@@ -73,12 +69,4 @@ class EmotionDataset(Dataset):
         one_hot_tensor = one_hot(indices, num_classes=len(self.vocab)).float()
         emotion_label = self.classes.get(self.emotions[idx], -1)
         return one_hot_tensor, emotion_label
-
-# Hyperparameters
-max_sequence_length = 20
-batch_size = 10
-
-# Dataset and DataLoader creation
-dataset = EmotionDataset(train_texts, train_emotions, max_len=max_sequence_length)
-dataloader = DataLoader(dataset, batch_size=batch_size, shuffle=True)
 
