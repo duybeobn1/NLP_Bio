@@ -31,7 +31,30 @@ output_size = len(classes)
 model = CustomRNN(input_size, emb_size, hidden_size, output_size)
 
 
-batch_input = torch.randn(10, 20, input_size)
+### 1 mot
+model.eval()
+with torch.no_grad():
+    one_hot_sentence, label = dataset[0]  # (seq_len, vocab_size)
+    input_word = one_hot_sentence[0].unsqueeze(0).unsqueeze(0)  # Add dim seq_len: shape (1, 1, vocab_size)
 
-output = model(batch_input)
-print("Output shape:", output.shape)   
+    # hidden (num_layers=1, batch_size=1, hidden_size)
+    hidden = torch.zeros(1, 1, model.hidden_size)  
+    
+    # Input for model
+    output, hidden_out = model.rnn(model.i2e(input_word), hidden)
+    
+    # Last hidden (batch_size=1)
+    logits = model.h2o(hidden_out.squeeze(0))
+    probs = model.softmax(logits)
+    
+    print("Output log-probs 1-word:", probs)
+
+    # probs: output của logsoftmax với shape (batch_size=1, num_classes=6)
+    predicted_class_idx = probs.argmax(dim=1).item()
+
+    print("Guessing (class index):", predicted_class_idx)
+
+    # For convenience, map back to emotion names
+    idx2emotion = {i: e for e, i in classes.items()}
+    print("Guessing emotion:", idx2emotion.get(predicted_class_idx, "Unknown"))
+
