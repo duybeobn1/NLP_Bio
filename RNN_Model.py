@@ -18,7 +18,7 @@ class CustomRNN(nn.Module):
         embedded = self.i2e(line_tensor)            # (batch, seq_len, emb_size)
         rnn_out, hidden = self.rnn(embedded)        # rnn_out: (batch, seq_len, hidden_size)
         output = self.h2o(hidden.squeeze(0))        # hidden.shape: (num_layers=1, batch, hidden_size)
-                                                    # lấy hidden state cuối cùng của layer ẩn (batch, hidden_size)
+                                                    # take the last hidden state
         output = self.softmax(output)                # (batch, output_size)
         return output
 
@@ -34,4 +34,4 @@ model = CustomRNN(input_size, emb_size, hidden_size, output_size)
 batch_input = torch.randn(10, 20, input_size)
 
 output = model(batch_input)
-print("Output shape:", output.shape)   # Kỳ vọng: (10, 6)
+print("Output shape:", output.shape)   
