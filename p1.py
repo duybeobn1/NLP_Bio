@@ -38,7 +38,7 @@ class EmotionDataset(Dataset):
 
     def computeClassesAndVocabs(self) : 
         # Build token list for Vocab
-        flattened_tokens = [token for tokens in yield_tokens(train_texts) for token in tokens]
+        flattened_tokens = [token for tokens in yield_tokens(self.texts) for token in tokens]
         counter = Counter(flattened_tokens)
         specials = ["<pad>", "<unk>"]
         vocab = Vocab(counter, specials=specials)
@@ -46,7 +46,7 @@ class EmotionDataset(Dataset):
         unk_idx = vocab.stoi["<unk>"]
 
         # Vocab for emotions/classes
-        class_names = sorted(set(train_emotions))
+        class_names = sorted(set(self.emotions))
         classes = {e: i for i, e in enumerate(class_names)}
 
         return classes, vocab, pad_idx, unk_idx

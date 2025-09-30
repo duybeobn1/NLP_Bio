@@ -7,6 +7,10 @@ import torch
 train_texts, train_emotions = load_file("./dataset/train.txt")
 test_texts, test_emotions = load_file("./dataset/test.txt")
 
+#Hyperparamètres extra modèle
+max_sequence_length = 20
+batch_size = 10
+
 # Dataset and DataLoader creation
 dataset_train = EmotionDataset(train_texts, train_emotions, max_len=max_sequence_length)
 dataloader_train = DataLoader(dataset_train, batch_size=batch_size, shuffle=True)
@@ -19,31 +23,32 @@ input_size = len(dataset_train.vocab)
 emb_size = 256
 hidden_size = 128
 output_size = len(dataset_train.classes)
+eta = 0.001
+nb_epochs = 20
 
 #Définition Modèle
 model_manual = CustomRNN_manual(input_size, emb_size, hidden_size, output_size)
 
+loss_func = torch.nn.CrossEntropyLoss()  # Change MSELoss to CrossEntropyLoss for classification
+optim = torch.optim.SGD(model_manual.parameters(), lr=eta)
 
 print(dataset_train)
 
-
-"""
 # Training loop
 for n in range(nb_epochs):
-    model.train()  # Set model to training mode
-    for x, t in train_loader:
+    model_manual.train()  # Set model to training mode
+    for x, t in dataloader_train:
         optim.zero_grad()  # Clear gradients
-        y = model(x)       # Forward pass
+        y = model_manual(x)      # Forward pass
         loss = loss_func(y, t)  # Compute loss
         loss.backward()    # Backward pass
         optim.step()       # Update weights
 
     # Test loop
-    model.eval()  # Set model to evaluation mode
+    model_manual.eval()  # Set model to evaluation mode
     acc = 0
     with torch.no_grad():  # No need to compute gradients during testing
-        for x, t in test_loader:
-            y = model(x)
+        for x, t in dataloader_test:
+            y = model_manual(x)
             acc += (torch.argmax(y, 1) == t).item()
-    print(f'Epoch {n+1}/{nb_epochs}, Accuracy: {acc / len(data_test)}')
-"""
+    print(f'Epoch {n+1}/{nb_epochs}, Accuracy: {acc / len(dataloader_test)}')

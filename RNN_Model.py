@@ -16,7 +16,9 @@ class CustomRNN_manual(nn.Module):
             # mot par mot, inputs shape (batch_size, input_size)
             batch_size = inputs.size(0)
             hidden = torch.zeros(batch_size, self.hidden_size, device=inputs.device)
-            embedded = self.i2e(inputs)                           # (batch_size, emb_size)
+            embedded = self.i2e(inputs)    # (batch_size, emb_size)   
+            print(hidden.size)
+            print(embedded.size)                    
             combined = torch.cat((embedded, hidden), dim=1)
             hidden = torch.tanh(self.i2h(combined))
             output = self.i2o(combined)
@@ -28,6 +30,7 @@ class CustomRNN_manual(nn.Module):
             batch_size = inputs.size(0)
             seq_len = inputs.size(1)
             hidden = torch.zeros(batch_size, self.hidden_size, device=inputs.device)
+            output = []
             for t in range(seq_len):
                 input_t = inputs[:, t, :]
                 embedded = self.i2e(input_t)
