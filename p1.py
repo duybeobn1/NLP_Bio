@@ -88,6 +88,3 @@ for inputs, targets in dataloader:
     print("Targets (sample values):", targets[:3])
     break
 
-
-# For mapping label indices back to emotion, if needed:
-idx2emotion = {i: emotion for emotion, i in classes.items()}
