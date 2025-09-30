@@ -16,7 +16,7 @@ class CustomRNN_manual(nn.Module):
         batch_size = inputs.size(0)
         seq_len = inputs.size(1)
 
-        hidden = torch.zeros(batch_size, self.hidden_size, device=inputs.device)
+        hidden = torch.zeros(batch_size, self.hidden_size)
 
         for t in range(seq_len):
             input_t = inputs[:, t, :]  # (batch_size, input_size)
@@ -39,14 +39,37 @@ output_size = len(classes)
 model_manual = CustomRNN_manual(input_size, emb_size, hidden_size, output_size)
 
 # 1-word
+# model_manual.eval()
+# with torch.no_grad():
+#     one_hot_sentence, label = dataset[0]
+#     input_word = one_hot_sentence[0].unsqueeze(0).unsqueeze(0) # shape (1, 1, vocab_size)
+
+#     output = model_manual(input_word)
+
+#     predicted_class = output.argmax(dim=1).item()
+
+#     idx2emotion = {i:e for e,i in classes.items()}
+#     print("Prediction:", idx2emotion.get(predicted_class, "Unknown"))
+
+
+
 model_manual.eval()
 with torch.no_grad():
-    one_hot_sentence, label = dataset[0]
-    input_word = one_hot_sentence[0].unsqueeze(0).unsqueeze(0) # shape (1, 1, vocab_size)
-
-    output = model_manual(input_word)
-
-    predicted_class = output.argmax(dim=1).item()
-
+    one_hot_sentence, label = dataset[0]  # (seq_len, vocab_size)
+    hidden = torch.zeros(1, model_manual.hidden_size)
+    for t in range(one_hot_sentence.shape[0]):
+        input_word = one_hot_sentence[t].unsqueeze(0)  # (1, vocab_size)
+        embedded = model_manual.i2e(input_word)
+        combined = torch.cat((embedded, hidden), dim=1)
+        hidden = torch.tanh(model_manual.i2h(combined))
+        
+        output = model_manual.i2o(combined)
+        output = model_manual.softmax(output)
+    
+    pred_class = output.argmax(dim=1).item()
+    print("Prediction récursive 1 phrase:", pred_class)
     idx2emotion = {i:e for e,i in classes.items()}
-    print("Prediction:", idx2emotion.get(predicted_class, "Unknown"))
+    print("Emotion:", idx2emotion.get(pred_class, "Unknown"))
+
+
+
