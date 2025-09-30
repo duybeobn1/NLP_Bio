@@ -32,27 +32,28 @@ def load_file(file):
 # Data loading
 train_texts, train_emotions = load_file("./dataset/train.txt")
 
-# Build token list for Vocab
-flattened_tokens = [token for tokens in yield_tokens(train_texts) for token in tokens]
-counter = Counter(flattened_tokens)
-specials = ["<pad>", "<unk>"]
-vocab = Vocab(counter, specials=specials)
-pad_idx = vocab.stoi["<pad>"]
-unk_idx = vocab.stoi["<unk>"]
-
-# Vocab for emotions/classes
-class_names = sorted(set(train_emotions))
-classes = {e: i for i, e in enumerate(class_names)}
 
 class EmotionDataset(Dataset):
-    def __init__(self, texts, emotions, vocab, classes, max_len=20):
+    def __init__(self, texts, emotions, max_len=20):
         self.texts = texts
         self.emotions = emotions
-        self.vocab = vocab
-        self.classes = classes
         self.max_len = max_len
-        self.pad_idx = vocab.stoi["<pad>"]
-        self.unk_idx = vocab.stoi["<unk>"]
+        self.classes, self.vocab, self.pad_idx, self.unk_idx = self.computeClassesAndVocabs()
+
+    def computeClassesAndVocabs(self) : 
+        # Build token list for Vocab
+        flattened_tokens = [token for tokens in yield_tokens(train_texts) for token in tokens]
+        counter = Counter(flattened_tokens)
+        specials = ["<pad>", "<unk>"]
+        vocab = Vocab(counter, specials=specials)
+        pad_idx = vocab.stoi["<pad>"]
+        unk_idx = vocab.stoi["<unk>"]
+
+        # Vocab for emotions/classes
+        class_names = sorted(set(train_emotions))
+        classes = {e: i for i, e in enumerate(class_names)}
+
+        return classes, vocab, pad_idx, unk_idx
 
     def __len__(self):
         return len(self.texts)
@@ -78,6 +79,6 @@ max_sequence_length = 20
 batch_size = 10
 
 # Dataset and DataLoader creation
-dataset = EmotionDataset(train_texts, train_emotions, vocab, classes, max_len=max_sequence_length)
+dataset = EmotionDataset(train_texts, train_emotions, max_len=max_sequence_length)
 dataloader = DataLoader(dataset, batch_size=batch_size, shuffle=True)
 

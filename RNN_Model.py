@@ -38,13 +38,6 @@ class CustomRNN_manual(nn.Module):
             return output, hidden
 
 
-input_size = len(vocab)
-emb_size = 256
-hidden_size = 128
-output_size = len(classes)
-
-model_manual = CustomRNN_manual(input_size, emb_size, hidden_size, output_size)
-
 # 1-word
 # model_manual.eval()
 # with torch.no_grad():
@@ -79,7 +72,7 @@ model_manual = CustomRNN_manual(input_size, emb_size, hidden_size, output_size)
 #     print("Emotion:", idx2emotion.get(pred_class, "Unknown"))
 
 
-
+"""
 
 model_manual.eval()
 
@@ -111,3 +104,4 @@ with torch.no_grad():
         print("Emotions:", emotions)
         
         break 
+"""
