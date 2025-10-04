@@ -15,7 +15,9 @@ batch_size = 10
 dataset_train = EmotionDataset(train_texts, train_emotions, max_len=max_sequence_length)
 dataloader_train = DataLoader(dataset_train, batch_size=batch_size, shuffle=True)
 
-dataset_test = EmotionDataset(test_texts, test_emotions, max_len=max_sequence_length)
+# Using vocab and classes from dataset_train for dataset_test
+dataset_test = EmotionDataset(test_texts, test_emotions, max_len=max_sequence_length, 
+                               vocab=dataset_train.vocab, classes=dataset_train.classes)
 dataloader_test = DataLoader(dataset_test, batch_size=batch_size, shuffle=True)
 
 # Hyper-Paramètres
@@ -39,7 +41,7 @@ for n in range(nb_epochs):
     model_manual.train()  # Set model to training mode
     for x, t in dataloader_train:
         optim.zero_grad()  # Clear gradients
-        y = model_manual(x)      # Forward pass
+        y, _ = model_manual(x, mini_batch = False)   # Forward pass
         loss = loss_func(y, t)  # Compute loss
         loss.backward()    # Backward pass
         optim.step()       # Update weights
@@ -49,6 +51,6 @@ for n in range(nb_epochs):
     acc = 0
     with torch.no_grad():  # No need to compute gradients during testing
         for x, t in dataloader_test:
-            y = model_manual(x)
-            acc += (torch.argmax(y, 1) == t).item()
-    print(f'Epoch {n+1}/{nb_epochs}, Accuracy: {acc / len(dataloader_test)}')
+            y, _ = model_manual(x, mini_batch = False)
+            acc += (torch.argmax(y, 1) == t).sum().item()
+    print(f'Epoch {n+1}/{nb_epochs}, Accuracy: {acc / len(dataset_test)}')

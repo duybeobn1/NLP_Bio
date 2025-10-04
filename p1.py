@@ -30,13 +30,22 @@ def load_file(file):
     return texts, emotions
 
 class EmotionDataset(Dataset):
-    def __init__(self, texts, emotions, max_len=20):
+    def __init__(self, texts, emotions, max_len=20, vocab=None, classes=None):
         self.texts = texts
         self.emotions = emotions
         self.max_len = max_len
-        self.classes, self.vocab, self.pad_idx, self.unk_idx = self.computeClassesAndVocabs()
+        
+        # Nếu vocab và classes được cung cấp, dùng chúng
+        if vocab is not None and classes is not None:
+            self.vocab = vocab
+            self.classes = classes
+            self.pad_idx = vocab.stoi["<pad>"]
+            self.unk_idx = vocab.stoi["<unk>"]
+        else:
+            # Nếu không, tính toán mới
+            self.classes, self.vocab, self.pad_idx, self.unk_idx = self.computeClassesAndVocabs()
 
-    def computeClassesAndVocabs(self) : 
+    def computeClassesAndVocabs(self):
         # Build token list for Vocab
         flattened_tokens = [token for tokens in yield_tokens(self.texts) for token in tokens]
         counter = Counter(flattened_tokens)
@@ -50,6 +59,7 @@ class EmotionDataset(Dataset):
         classes = {e: i for i, e in enumerate(class_names)}
 
         return classes, vocab, pad_idx, unk_idx
+
 
     def __len__(self):
         return len(self.texts)
