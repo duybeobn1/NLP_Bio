@@ -93,11 +93,13 @@ def undersample_dataset_random(texts, emotions, random_state=42):
     print(f"Balanced distribution:\n{df_balanced['emotion'].value_counts()}")
     
     return df_balanced['text'].tolist(), df_balanced['emotion'].tolist()
+
 class EmotionDataset(Dataset):
-    def __init__(self, texts, emotions, max_len=20, vocab=None, classes=None):
+    def __init__(self, texts, emotions, max_len=20, vocab=None, classes=None ,rare_threshold = 0):
         self.texts = texts
         self.emotions = emotions
         self.max_len = max_len
+        self.rare_threshold = rare_threshold
         
         # Nếu vocab và classes được cung cấp, dùng chúng
         if vocab is not None and classes is not None:
@@ -110,20 +112,35 @@ class EmotionDataset(Dataset):
             self.classes, self.vocab, self.pad_idx, self.unk_idx = self.computeClassesAndVocabs()
 
     def computeClassesAndVocabs(self):
-        # Build token list for Vocab
+        """
+        Construit le vocabulaire et les classes, en retirant les mots rares (<rare_threshold occurrences)
+        """
+
+        # Build token list pour tout le dataset
         flattened_tokens = [token for tokens in yield_tokens(self.texts) for token in tokens]
-        counter = Counter(flattened_tokens)
+        token_counts = Counter(flattened_tokens)
+        
+        if self.rare_threshold > 0 : 
+            # Identifier les mots fréquents
+            frequent_tokens = {token: count for token, count in token_counts.items() if count >= self.rare_threshold}
+            print(f"Taille vocab avant filtrage : {len(token_counts)}, après filtrage des mots rares (<{self.rare_threshold} occurrences) : {len(frequent_tokens)}")
+            
+        # Spéciaux
         specials = ["<pad>", "<unk>"]
-        vocab = Vocab(counter, specials=specials)
+        
+        # Construire le vocab avec seulement les tokens fréquents
+        if self.rare_threshold > 0 : 
+            vocab = Vocab(Counter(frequent_tokens), specials=specials)
+        else : 
+            vocab = Vocab(Counter(token_counts), specials=specials)
         pad_idx = vocab.stoi["<pad>"]
         unk_idx = vocab.stoi["<unk>"]
 
-        # Vocab for emotions/classes
+        # Vocab pour les classes / émotions
         class_names = sorted(set(self.emotions))
         classes = {e: i for i, e in enumerate(class_names)}
 
         return classes, vocab, pad_idx, unk_idx
-
 
     def __len__(self):
         return len(self.texts)

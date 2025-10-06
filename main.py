@@ -18,7 +18,7 @@ max_sequence_length = 20
 batch_size = 10
 
 # Dataset and DataLoader creation with balanced data
-dataset_train = EmotionDataset(train_texts_balanced, train_emotions_balanced, max_len=max_sequence_length)
+dataset_train = EmotionDataset(train_texts_balanced, train_emotions_balanced, max_len=max_sequence_length, rare_threshold=2)
 dataloader_train = DataLoader(dataset_train, batch_size=batch_size, shuffle=True)
 
 # Test dataset uses original test distribution
