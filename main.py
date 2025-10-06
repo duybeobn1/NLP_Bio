@@ -28,7 +28,7 @@ dataloader_test = DataLoader(dataset_test, batch_size=batch_size, shuffle=True)
 
 # Hyper-Paramètres
 input_size = len(dataset_train.vocab)
-emb_size = 128  # Increased
+emb_size = 128
 hidden_size = 128
 output_size = len(dataset_train.classes)
 eta = 0.001  # Increased learning rate
@@ -65,3 +65,10 @@ for n in range(nb_epochs):
     val_acc = acc / len(dataset_test)
     print(f'Epoch {n+1}/{nb_epochs}, Loss: {total_loss/len(dataloader_train):.4f}, Accuracy: {val_acc:.4f}')
     
+torch.save({
+    'model_state_dict': model_manual.state_dict(),
+    'vocab': dataset_train.vocab,
+    'classes': dataset_train.classes
+}, "rnn_model_checkpoint.pth")
+
+print("✅ Model saved successfully to rnn_model_checkpoint.pth")
