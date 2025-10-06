@@ -4,6 +4,7 @@ from torch.nn.functional import one_hot
 from torchtext.vocab import Vocab
 from collections import Counter
 
+import pandas as pd
 def tokenizer(text):
     """Simple tokenizer - modify for advanced needs"""
     return text.lower().split()
@@ -29,6 +30,69 @@ def load_file(file):
                 emotions.append(emotion)
     return texts, emotions
 
+def undersample_dataset(texts, emotions):
+    """
+    Undersample the dataset to balance classes
+    Returns: balanced_texts, balanced_emotions
+    """
+    # Create DataFrame-like structure
+    data = list(zip(texts, emotions))
+    
+    # Count examples per class
+    emotion_counts = Counter(emotions)
+    print(f"Original class distribution: {emotion_counts}")
+    
+    # Find the minority class count
+    min_count = min(emotion_counts.values())
+    print(f"Undersampling: each class will have {min_count} examples")
+    
+    # Group by emotion and sample
+    emotion_to_texts = {}
+    for text, emotion in data:
+        if emotion not in emotion_to_texts:
+            emotion_to_texts[emotion] = []
+        emotion_to_texts[emotion].append(text)
+    
+    # Undersample each class
+    balanced_texts = []
+    balanced_emotions = []
+    
+    for emotion, text_list in emotion_to_texts.items():
+        # Sample min_count examples from each class
+        sampled_texts = text_list[:min_count]  # Or use random.sample for randomness
+        balanced_texts.extend(sampled_texts)
+        balanced_emotions.extend([emotion] * min_count)
+    
+    print(f"Final dataset size: {len(balanced_texts)}")
+    return balanced_texts, balanced_emotions
+
+# Alternative version using random sampling
+def undersample_dataset_random(texts, emotions, random_state=42):
+    """
+    Undersample with random sampling for each class
+    """
+    import random
+    random.seed(random_state)
+    
+    # Create DataFrame for easier manipulation
+    df = pd.DataFrame({'text': texts, 'emotion': emotions})
+    
+    # Find the minority class count
+    min_count = df['emotion'].value_counts().min()
+    print(f"Undersampling: each class will have {min_count} examples")
+    
+    # Sample from each class
+    df_balanced = df.groupby('emotion').apply(
+        lambda x: x.sample(n=min_count, random_state=random_state)
+    ).reset_index(drop=True)
+    
+    # Shuffle the dataset
+    df_balanced = df_balanced.sample(frac=1, random_state=random_state)
+    
+    print(f"Original size: {len(df)}, Balanced size: {len(df_balanced)}")
+    print(f"Balanced distribution:\n{df_balanced['emotion'].value_counts()}")
+    
+    return df_balanced['text'].tolist(), df_balanced['emotion'].tolist()
 class EmotionDataset(Dataset):
     def __init__(self, texts, emotions, max_len=20, vocab=None, classes=None):
         self.texts = texts
@@ -42,7 +106,7 @@ class EmotionDataset(Dataset):
             self.pad_idx = vocab.stoi["<pad>"]
             self.unk_idx = vocab.stoi["<unk>"]
         else:
-            # Nếu không, tính toán mới
+            
             self.classes, self.vocab, self.pad_idx, self.unk_idx = self.computeClassesAndVocabs()
 
     def computeClassesAndVocabs(self):
@@ -76,7 +140,7 @@ class EmotionDataset(Dataset):
 
     def __getitem__(self, idx):
         indices = self.encode_and_pad(self.texts[idx])
-        one_hot_tensor = one_hot(indices, num_classes=len(self.vocab)).float()
         emotion_label = self.classes.get(self.emotions[idx], -1)
-        return one_hot_tensor, emotion_label
+        return indices, emotion_label  # Return indices instead of one-hot tensors
 
+    

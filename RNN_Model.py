@@ -2,53 +2,61 @@ import torch
 import torch.nn as nn
 
 class CustomRNN_manual(nn.Module):
-    def __init__(self, input_size, emb_size, hidden_size, output_size):
+    def __init__(self, input_size, emb_size, hidden_size, output_size, pad_idx=None, use_residual=True):
         super(CustomRNN_manual, self).__init__()
-        # Linear layer to project one-hot (vocab) -> embedding
-        self.i2e = nn.Linear(input_size, emb_size)
-        # Recurrence: input is concatenation (emb + hidden)
-        self.i2h = nn.Linear(emb_size + hidden_size, hidden_size)
-        self.i2o = nn.Linear(emb_size + hidden_size, output_size)
-        self.hidden_size = hidden_size
-
-    def forward(self, inputs, mini_batch=True):
-        """
-        Args:
-            inputs: 
-                - mini_batch=True: (batch_size, input_size) for single step
-                - mini_batch=False: (batch_size, seq_len, input_size) for sequences
-            mini_batch: bool, whether to process single step or full sequence
         
-        Returns:
-            output: (batch_size, output_size) - raw logits
-            hidden: (batch_size, hidden_size) - final hidden state
-        """
+        # Embedding layer (with padding_idx if available)
+        self.embedding = nn.Embedding(input_size, emb_size, padding_idx=pad_idx)
+        
+        # Core RNN transformation
+        self.i2h = nn.Linear(emb_size + hidden_size, hidden_size)
+        self.h2o = nn.Linear(hidden_size, output_size)
+        
+        # Regularization and normalization
+        self.layernorm = nn.LayerNorm(hidden_size)
+        self.dropout = nn.Dropout(0.3)
+        self.use_residual = use_residual
+        
+        self.hidden_size = hidden_size
+        
+        # Initialize weights
+        self._init_weights()
+    
+    def _init_weights(self):
+        # Xavier initialization for weights and zero for biases
+        for name, param in self.named_parameters():
+            if 'weight' in name and param.dim() > 1:
+                nn.init.xavier_uniform_(param)
+            elif 'bias' in name:
+                nn.init.constant_(param, 0.0)
+    
+    def forward(self, inputs, mini_batch=False):
+        batch_size = inputs.size(0)
         device = inputs.device
         
-        if mini_batch:
-            # Single time-step processing
-            batch_size = inputs.size(0)
-            hidden = torch.zeros(batch_size, self.hidden_size, device=device)
+        # Small random initialization for hidden state
+        hidden = torch.randn(batch_size, self.hidden_size, device=device) * 0.01
+        
+        # Process the sequence token by token
+        for t in range(inputs.size(1)):
+            input_t = inputs[:, t]
+            embedded = self.embedding(input_t)
             
-            embedded = self.i2e(inputs)                           # (batch_size, emb_size)
-            combined = torch.cat((embedded, hidden), dim=1)       # (batch_size, emb+hid)
-            hidden = torch.tanh(self.i2h(combined))               # (batch_size, hidden_size)
-            output = self.i2o(combined)                           # (batch_size, output_size)
+            # Concatenate input and hidden state
+            combined = torch.cat((embedded, hidden), dim=1)
             
-            return output, hidden
-
-        else:
-            # Full sequence processing
-            batch_size = inputs.size(0)
-            seq_len = inputs.size(1)
-            hidden = torch.zeros(batch_size, self.hidden_size, device=device)
+            # Compute new hidden state with normalization
+            new_hidden = torch.tanh(self.layernorm(self.i2h(combined)))
             
-            for t in range(seq_len):
-                input_t = inputs[:, t, :]                         # (batch_size, input_size)
-                embedded = self.i2e(input_t)                      # (batch_size, emb_size)
-                combined = torch.cat((embedded, hidden), dim=1)   # (batch_size, emb+hid)
-                hidden = torch.tanh(self.i2h(combined))           # (batch_size, hidden_size)
-                output = self.i2o(combined)                       # (batch_size, output_size)
+            # Optional residual connection to improve gradient flow
+            if self.use_residual:
+                hidden = 0.5 * hidden + new_hidden
+            else:
+                hidden = new_hidden
             
-            # Return logits for last time-step and final hidden state
-            return output, hidden
+            # Clamp to prevent explosion
+            hidden = torch.clamp(hidden, -5, 5)
+        
+        # Apply dropout on the final hidden state
+        output = self.h2o(self.dropout(hidden))
+        return output, hidden
