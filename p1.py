@@ -22,7 +22,7 @@ def load_file(file):
             line = line.strip()
             if not line:
                 continue
-            parts = line.rsplit(' ', 1)
+            parts = line.rsplit(';', 1)
             if len(parts) == 2:
                 text, emotion = parts
                 texts.append(text)

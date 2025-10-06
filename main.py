@@ -22,7 +22,7 @@ dataloader_test = DataLoader(dataset_test, batch_size=batch_size, shuffle=True)
 
 # Hyper-Paramètres
 input_size = len(dataset_train.vocab)
-emb_size = 256
+emb_size = 32
 hidden_size = 128
 output_size = len(dataset_train.classes)
 eta = 0.001
