@@ -11,7 +11,7 @@ checkpoint = torch.load("rnn_model_checkpoint.pth")
 
 # === Recreate model with same structure ===
 input_size = len(checkpoint['vocab'])
-emb_size = 128
+emb_size = 128  
 hidden_size = 128
 output_size = len(checkpoint['classes'])
 

@@ -26,19 +26,52 @@
   - PCA et t-SNE
   - Visualisation avec Plotly, affichage du mot au survol
 
-## 2 - Notre meilleur modèle : 
+## 2 - Choix de la taille d’embedding et du hidden layer : 
+### Préparation et équilibrage des données
+La distribution des classes n’était pas équilibrée, donc nous avons appliqué une méthode d’undersampling pour obtenir le même nombre d’exemples par classe. 
+`
+Before undersampling:
+Training set size: 16000
+Undersampling: each class will have 572 examples
+`
+Chaque classe contient 572 phrases, ce qui donne un total de 3 432 phrases équilibrées. Les paramètres communs pour tous les entraînements sont :
+- Learning rate : 0.001
+- Batch size : 10
+- Longueur maximale de séquence : 20
+- Nombre d’époques : 50
 
-#### Meilleur hyperparamétrage
-- **Embedding size** : 128  
-- **Hidden size** : 128  
-- **Sequence length max** : 20  
-- **Batch size** : 10
-- **Learning rate** : 0.001  
-- **Nb epochs** : 50
+### Configurations testées et résultats
+#### Modele 1 : Embedding size = 64, Hidden size = 64
+![alt text](Figure_64_64.png)
+- Résultats d’entraînement : la perte (loss) baisse de **2.08 à 0.02**, l’accuracy atteint environ **53 %**.**
+- Validation : **Accuracy = 50.00 %.**
+- Le modèle apprend bien, mais la taille 64 est un peu petite pour représenter les mots correctement.
 
-**performance obtenue : ** 
+#### Modele 2 : Embedding size = 64, Hidden size = 128
+![alt text](Firgure_64_128.png)
+- Résultats d’entraînement : loss de **2.14 à 0.0**2**, accuracy moyenne autour de **40 %.**
+- Validation : **Accuracy = 40.60 %.**
+- La taille du hidden est plus grande, mais à cause du petit nombre d’exemples (3 432), le modèle généralise mal.
+#### Modele 3 : Embedding size = 128, Hidden size = 64
+![alt text](Figure_128_64.png)
+- Résultats d’entraînement : loss de **2.12 à 0.02**, accuracy autour de **48–50 %.**
+- Validation : **Accuracy = 50.25 %.**
+- Le modèle apprend mieux les mots (grâce à embedding 128), mais le hidden de 64 est trop petit pour garder toute l’information du contexte.
+#### Configuration 4 : Embedding size = 128, Hidden size = 128
+![alt text](Figure_128_128.png)
+- Résultats d’entraînement : loss baisse rapidement de **2.07 à 0.02.**, accuracy d’entraînement : environ **63–65 %**.
+- Validation : **Accuracy = 65.40 %.**
+- C’est la meilleure configuration, stable et avec la meilleure performance.
 
-INSERER LES VISUALISATIONS ICI
+### Explication du choix des dimensions 
+- La taille de l'embedding et du hidden layer affect directement accuracy du modèle RNN.
+  - L’embedding transforme chaque mot en un vecteur de nombres réels. Une taille trop petite ne permet pas de bien représenter le sens des mots.
+  - Le hidden layer garde l’information du contexte pendant la lecture de la phrase.
+- Si ces tailles sont trop grandes par rapport à la quantité de données, le modèle apprend trop les détails du train et fait de l’overfitting.
+- Pour notre modele,  le choix 128–128 donne les meilleurs résultats. Nous avons trouve que : quand la taille de l’embedding et hidden layer sont egaux, la transmission des informations entre les deux couches est plus simple et cohérente. Le réseau garde mieux les informations importantes sans les perdre ni les compresser. Aussi, le modèle apprend plus rapide, reste plus stable et comprend mieux les relations entre les mots. C’est pour cette raison que la configuration (128, 128) a obtenu la meilleure précision sur le jeu de validation (65,4 %).
+
+### Conclusion
+- La configuration (128, 128) représente un bon équilibre entre la complexité du modèle et la taille du jeu de données. Elle permet au RNN d’apprendre efficacement les caractéristiques sémantiques et émotionnelles des phrases, tout en évitant overfitting.
 
 
 ## 3 - Analyse des embeddings : 

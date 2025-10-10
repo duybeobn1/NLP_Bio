@@ -1,7 +1,7 @@
 from RNN_Model import *
 from p1 import *
 import torch
-
+import matplotlib.pyplot as plt
 # Data loading
 train_texts, train_emotions = load_file("./dataset/train.txt")
 test_texts, test_emotions = load_file("./dataset/test.txt")
@@ -26,24 +26,27 @@ dataset_test = EmotionDataset(test_texts, test_emotions, max_len=max_sequence_le
                                vocab=dataset_train.vocab, classes=dataset_train.classes)
 dataloader_test = DataLoader(dataset_test, batch_size=batch_size, shuffle=True)
 
-# Hyper-Paramètres
+# Hyper-parameters for the model
 input_size = len(dataset_train.vocab)
-emb_size = 128
-hidden_size = 128
+emb_size = 64
+hidden_size = 64
 output_size = len(dataset_train.classes)
 eta = 0.001  # Increased learning rate
 nb_epochs = 50  # More epochs
 
-# Définition Modèle
+# Initialize model, loss function, and optimizer
 model_manual = CustomRNN_manual(input_size, emb_size, hidden_size, output_size)
 
 loss_func = torch.nn.CrossEntropyLoss()
 optim = torch.optim.Adam(model_manual.parameters(), lr=eta)  # Use Adam
 
-# Training loop with improvements
+train_losses = []
+val_accuracies = []
+
 for n in range(nb_epochs):
     model_manual.train()
     total_loss = 0
+    
     for x, t in dataloader_train:
         optim.zero_grad()
         y, _ = model_manual(x, mini_batch=False)
@@ -61,14 +64,43 @@ for n in range(nb_epochs):
             y, _ = model_manual(x, mini_batch=False)
             acc += (torch.argmax(y, 1) == t).sum().item()
     
-    # Print training and validation loss
     val_acc = acc / len(dataset_test)
-    print(f'Epoch {n+1}/{nb_epochs}, Loss: {total_loss/len(dataloader_train):.4f}, Accuracy: {val_acc:.4f}')
+    avg_loss = total_loss / len(dataloader_train)
     
+    # Store metrics
+    train_losses.append(avg_loss)
+    val_accuracies.append(val_acc)
+    
+    print(f'Epoch {n+1}/{nb_epochs}, Loss: {avg_loss:.4f}, Accuracy: {val_acc:.4f}')
+    
+
+# Save the model checkpoint
 torch.save({
     'model_state_dict': model_manual.state_dict(),
     'vocab': dataset_train.vocab,
     'classes': dataset_train.classes
 }, "rnn_model_checkpoint.pth")
 
-print("✅ Model saved successfully to rnn_model_checkpoint.pth")
+print("Model saved successfully to rnn_model_checkpoint.pth")
+
+# Visualization of training loss and validation accuracy
+plt.figure(figsize=(10,4))
+
+# Plot Loss
+plt.subplot(1,2,1)
+plt.plot(train_losses, label='Training Loss')
+plt.title("Training Loss over Epochs")
+plt.xlabel("Epoch")
+plt.ylabel("Loss")
+plt.legend()
+
+# Plot Accuracy
+plt.subplot(1,2,2)
+plt.plot(val_accuracies, label='Validation Accuracy', color='orange')
+plt.title("Validation Accuracy over Epochs")
+plt.xlabel("Epoch")
+plt.ylabel("Accuracy")
+plt.legend()
+
+plt.tight_layout()
+plt.show()
