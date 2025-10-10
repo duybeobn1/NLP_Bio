@@ -1,9 +1,49 @@
+# Compte rendu TP NLP – Analyse des embeddings et classification émotionnelle
+** par Guilhem DUPUY, Anh Duy VU, Artus BLETON **
+
+## 1. Fonctionnalités développées
+
+#### Organisation de notre code : 
+- `RNN_Model.py` : définition de notre modèle neuronal dans la classe `CustomRNN_Manual`
+- `p1.py` : regroupe toutes les atres fonctions et objets personnalisés que nous utilisons dans le projet
+- `main.py`: contient notre travail pour la création et l'entraînement du modèle de classification des émotions
+- `main_embeddings_visu.py`: travail sur la partie visualisation de la représentation des mots
+
+#### Ce que nous avons mis en place : 
+- **Chargement et prétraitement des données** :  
+  - Lecture des fichiers train/test (`load_file`)  
+  - Tokenisation simple (`tokenizer`)  
+  - Undersampling aléatoire pour équilibrer les classes (`undersample_dataset_random`)  
+- **Construction des datasets PyTorch** :  
+  - classe `EmotionDataset` pour classification supervisée  
+- **RNN personnalisé** :  
+  - `CustomRNN_manual` avec embedding, couche linéaire, normalisation, dropout et connexion résiduelle
+  - Initialisation Xavier, clipping des gradients, support mini-batch  
+- **Apprentissage supervisé et auto-supervisé** :  
+  - Boucles d’entraînement optimisées avec Adam
+  - Support pour validation, calcul de la précision et affichage des courbes d’apprentissage
+- **Visualisation des embeddings** :  
+  - PCA et t-SNE
+  - Visualisation avec Plotly, affichage du mot au survol
+
+## 2 - Notre meilleur modèle : 
+
+#### Meilleur hyperparamétrage
+- **Embedding size** : 128  
+- **Hidden size** : 128  
+- **Sequence length max** : 20  
+- **Batch size** : 10
+- **Learning rate** : 0.001  
+- **Nb epochs** : 50
+
+**performance obtenue : ** 
+
+INSERER LES VISUALISATIONS ICI
 
 
+## 3 - Analyse des embeddings : 
 
-### Analyse des embeddings : 
-
-#### Fonctionnalités développées : 
+#### Fonctionnalités développées / testées : 
 - Travail rassemblé dans le fichier "main_embeddings_visu.py"
 - Réduction de dimension (méthodes PCA et t-SNE testées)
 - Visualisation des résultats via l'utilistion de Plotly
