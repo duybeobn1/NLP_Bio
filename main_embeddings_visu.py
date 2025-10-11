@@ -6,7 +6,7 @@ from RNN_Model import CustomRNN_manual
 import plotly.express as px
 
 # Chargement du modèle entraîné.
-checkpoint = torch.load("rnn_model_checkpoint.pth", map_location=torch.device('cpu'))
+checkpoint = torch.load("model128_128_655.pth", map_location=torch.device('cpu'))
 
 vocab = checkpoint['vocab']
 model_state = checkpoint['model_state_dict']
@@ -24,6 +24,7 @@ print("Shape des embeddings :", embeddings.shape)
 pca = PCA(n_components=2)
 embeddings_2d_pca = pca.fit_transform(embeddings)
 """
+
 #t-SNE
 tsne = TSNE(n_components=2, perplexity=30, max_iter=1000)
 embeddings_2d_tsne = tsne.fit_transform(embeddings)

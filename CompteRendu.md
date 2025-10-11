@@ -1,11 +1,11 @@
 # Compte rendu TP NLP – Analyse des embeddings et classification émotionnelle
-** par Guilhem DUPUY, Anh Duy VU, Artus BLETON **
+**par Guilhem DUPUY, Anh Duy VU, Artus BLETON**
 
 ## 1. Fonctionnalités développées
 
 #### Organisation de notre code : 
 - `RNN_Model.py` : définition de notre modèle neuronal dans la classe `CustomRNN_Manual`
-- `p1.py` : regroupe toutes les atres fonctions et objets personnalisés que nous utilisons dans le projet
+- `p1.py` : regroupe toutes les autres fonctions et objets personnalisés que nous utilisons dans le projet
 - `main.py`: contient notre travail pour la création et l'entraînement du modèle de classification des émotions
 - `main_embeddings_visu.py`: travail sur la partie visualisation de la représentation des mots
 
@@ -41,26 +41,43 @@ Chaque classe contient 572 phrases, ce qui donne un total de 3 432 phrases équi
 - Nombre d’époques : 50
 
 ### Configurations testées et résultats
-#### Modele 1 : Embedding size = 64, Hidden size = 64
+#### Modèle 1 : Embedding size = 64, Hidden size = 64
 ![alt text](Figure_64_64.png)
-- Résultats d’entraînement : la perte (loss) baisse de **2.08 à 0.02**, l’accuracy atteint environ **53 %**.**
+![alt text](Figure_64_64_confusionmatrix.png)
+- Résultats d’entraînement : la perte (loss) baisse de **2.08 à 0.02**, l’accuracy atteint environ **53 %**.
 - Validation : **Accuracy = 50.00 %.**
+- Confusions fréquentes entre anger/sadness, et joy/love/sadness
 - Le modèle apprend bien, mais la taille 64 est un peu petite pour représenter les mots correctement.
 
-#### Modele 2 : Embedding size = 64, Hidden size = 128
-![alt text](Firgure_64_128.png)
-- Résultats d’entraînement : loss de **2.14 à 0.0**2**, accuracy moyenne autour de **40 %.**
-- Validation : **Accuracy = 40.60 %.**
+<div style="page-break-before: always;"></div>
+
+
+#### Modèle 2 : Embedding size = 64, Hidden size = 128
+![alt text](Figure_64_128.png)
+![alt text](Figure_64_128_confusionmatrix.png)
+- Résultats d’entraînement : loss de **2.14 à 0.02**, accuracy moyenne autour de **40 %.**
+- Validation : **Accuracy = 40.60 %.** 
+- Très mauvaise Précision sur l'émotion "anger", sur-prédite par le modèle
 - La taille du hidden est plus grande, mais à cause du petit nombre d’exemples (3 432), le modèle généralise mal.
-#### Modele 3 : Embedding size = 128, Hidden size = 64
+
+<div style="page-break-before: always;"></div>
+
+#### Modèle 3 : Embedding size = 128, Hidden size = 64
 ![alt text](Figure_128_64.png)
+![alt text](Figure_128_64_confusionmatrix.png)
 - Résultats d’entraînement : loss de **2.12 à 0.02**, accuracy autour de **48–50 %.**
 - Validation : **Accuracy = 50.25 %.**
+- Confusions fréquentes entre joy/sadness
 - Le modèle apprend mieux les mots (grâce à embedding 128), mais le hidden de 64 est trop petit pour garder toute l’information du contexte.
+
+<div style="page-break-before: always;"></div>
+
 #### Configuration 4 : Embedding size = 128, Hidden size = 128
 ![alt text](Figure_128_128.png)
+![alt text](Figure_128_128_confusionmatrix.png)
 - Résultats d’entraînement : loss baisse rapidement de **2.07 à 0.02.**, accuracy d’entraînement : environ **63–65 %**.
 - Validation : **Accuracy = 65.40 %.**
+- Précision obtenue relativement uniforme entre les classes, à l'exception de "fear", légèrement surprédite lorsque l'émotion réelle est "surprise"
 - C’est la meilleure configuration, stable et avec la meilleure performance.
 
 ### Explication du choix des dimensions 
@@ -68,7 +85,7 @@ Chaque classe contient 572 phrases, ce qui donne un total de 3 432 phrases équi
   - L’embedding transforme chaque mot en un vecteur de nombres réels. Une taille trop petite ne permet pas de bien représenter le sens des mots.
   - Le hidden layer garde l’information du contexte pendant la lecture de la phrase.
 - Si ces tailles sont trop grandes par rapport à la quantité de données, le modèle apprend trop les détails du train et fait de l’overfitting.
-- Pour notre modele,  le choix 128–128 donne les meilleurs résultats. Nous avons trouve que : quand la taille de l’embedding et hidden layer sont egaux, la transmission des informations entre les deux couches est plus simple et cohérente. Le réseau garde mieux les informations importantes sans les perdre ni les compresser. Aussi, le modèle apprend plus rapide, reste plus stable et comprend mieux les relations entre les mots. C’est pour cette raison que la configuration (128, 128) a obtenu la meilleure précision sur le jeu de validation (65,4 %).
+- Pour notre modèle, le choix 128–128 donne les meilleurs résultats. Nous avons trouvé que : quand la taille de l’embedding et hidden layer sont egaux, la transmission des informations entre les deux couches est plus simple et cohérente. Le réseau garde mieux les informations importantes sans les perdre ni les compresser. Aussi, le modèle apprend plus rapide, reste plus stable et capture mieux les relations entre les mots. C’est pour cette raison que la configuration (128, 128) a obtenu la meilleure précision sur le jeu de validation (65,4 %).
 
 ### Conclusion
 - La configuration (128, 128) représente un bon équilibre entre la complexité du modèle et la taille du jeu de données. Elle permet au RNN d’apprendre efficacement les caractéristiques sémantiques et émotionnelles des phrases, tout en évitant overfitting.
@@ -79,7 +96,7 @@ Chaque classe contient 572 phrases, ce qui donne un total de 3 432 phrases équi
 #### Fonctionnalités développées / testées : 
 - Travail rassemblé dans le fichier "main_embeddings_visu.py"
 - Réduction de dimension (méthodes PCA et t-SNE testées)
-- Visualisation des résultats via l'utilistion de Plotly
+- Visualisation des résultats via l'utilisation de Plotly
 
 #### Choix : 
 - la réduction de dimensions PCA : 1 dimension semblait prédominer sur la PCA, ce qui fait que les résultats étaient plus alignés donc moins lisibles
@@ -88,18 +105,19 @@ Chaque classe contient 572 phrases, ce qui donne un total de 3 432 phrases équi
 - En augmentant à 150 le nombre de mots exclus, certains clusters se définissent encore plus clairement. Ces 2 représentations sont enregistrées dans les fichiers "EmbeddingSpace_50wordsExcluded.png" et "EmbeddingSpace_150wordsExcluded.png"
 
 #### Sur la visualisation, identification des principaux clusters : 
-- [-25; 65] : cluster interprété comme celui adjectifs positifs, attribuables à un partenaire romantique (sweet, caring, loving, supporting, mais aussi hot et horny apparemment). Tous ces adjectifs sont extrèmement regroupés dans l'espace d'embedding réduit, et identifiés comme quasiment identiques par notre modèle RNN. C'est le cluster le mieux défini visuellement.
+![alt text](EmbeddingSpace_150wordsExcluded.png)
+- [-25; 65] : cluster interprété comme celui adjectifs positifs, attribuables à un partenaire romantique (sweet, caring, loving, supporting, mais aussi *hot* et *horny*, apparemment). Tous ces adjectifs sont extrèmement regroupés dans l'espace d'embedding réduit, et identifiés comme quasiment identiques par notre modèle RNN. C'est le cluster le mieux défini visuellement.
 - [-58; -9] : cluster des adjectifs associés au danger (cold, agitated, angry, dangerous, irritated)
 - [-10; 2] : cluster de la timidité (Insecure, unsure, intimidated, anxious ...)
 - Note : les clusters, même plus petits, semblent finalement rendre compte de la classe grammaticale des mots : adjectifs, verbes, noms ...
 
-#### Illustration trouvées du théorème des analogies vectorielles dans les embeddings :
-- Le vecteur du mot "No" semble utiliser pour qualifier plusieurs types de relations dans notre espace (vecteur [37;-37])
+#### Illustrations trouvées du théorème des analogies vectorielles dans les embeddings :
+- Le vecteur du mot "No" semble utilisé pour qualifier plusieurs types de relations dans notre espace (vecteur [37;-37])
 - Exemple 1 : utilisation de négation classique. Une distance similaire au vecteur "no" entre "didn't" et "doing".
 - Exemple 2 : utilisation pour distinguer un mot et son contraire : relation observée entre "good" et "bad", entre "Always" et "Never".
 
 #### Conclusions : 
 - Globalement, ces visualisations donnent une bonne intuition de la façon dont le modèle encode le sens des mots et des relations entre eux. On retrouve bien certaines relations classiques comme la négation, ce qui confirme que le modèle capture des analogies entre mots.
-- Cet exemple illustre l'intéret du part-of-speech tagging (POS-tagging) dans le NLP : notre modèle semble accorder beaucoup d'importance à la classe grammaticale des mots. Avoir des données déjà étiquettées doit permettre d'améliorer et accélérer sensiblement l'apprentissage.
+- Cet exemple illustre l'intéret du part-of-speech tagging (POS-tagging) dans le NLP : notre modèle semble accorder beaucoup d'importance à la classe grammaticale des mots. Avoir des données déjà étiquetées doit permettre d'améliorer et accélérer sensiblement l'apprentissage.
 - La réduction par t-SNE semble plus adaptée à cet usage. D’après nos recherches, cela vient du fait que cette méthode est non-linéaire et cherche à préserver les distances locales tout en étirant les zones de faible densité. t-SNE est donc plus susceptible de révéler des nuances subtiles, que PCA pourrait “écraser” par son approche linéaire brute.
 - L’apprentissage auto-supervisé (contexte => mot) devrait permettre de renforcer ces liens et de rendre les embeddings encore plus représentatifs.
