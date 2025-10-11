@@ -20,7 +20,7 @@ print("Shape des embeddings :", embeddings.shape)
 
 #Reduction simple sur 2 dimensions pour visualisation simple (sur les X mots les plus utilisés) :
 """
-#PCA : 
+#PCA :
 pca = PCA(n_components=2)
 embeddings_2d_pca = pca.fit_transform(embeddings)
 """

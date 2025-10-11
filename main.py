@@ -22,7 +22,7 @@ dataset_train = EmotionDataset(train_texts_balanced, train_emotions_balanced, ma
 dataloader_train = DataLoader(dataset_train, batch_size=batch_size, shuffle=True)
 
 # Test dataset uses original test distribution
-dataset_test = EmotionDataset(test_texts, test_emotions, max_len=max_sequence_length, 
+dataset_test = EmotionDataset(test_texts, test_emotions, max_len=max_sequence_length,
                                vocab=dataset_train.vocab, classes=dataset_train.classes)
 dataloader_test = DataLoader(dataset_test, batch_size=batch_size, shuffle=True)
 
@@ -46,7 +46,7 @@ val_accuracies = []
 for n in range(nb_epochs):
     model_manual.train()
     total_loss = 0
-    
+
     for x, t in dataloader_train:
         optim.zero_grad()
         y, _ = model_manual(x, mini_batch=False)
@@ -55,7 +55,7 @@ for n in range(nb_epochs):
         torch.nn.utils.clip_grad_norm_(model_manual.parameters(), max_norm=1.0)
         optim.step()
         total_loss += loss.item()
-    
+
     # Validation
     model_manual.eval()
     acc = 0
@@ -63,16 +63,16 @@ for n in range(nb_epochs):
         for x, t in dataloader_test:
             y, _ = model_manual(x, mini_batch=False)
             acc += (torch.argmax(y, 1) == t).sum().item()
-    
+
     val_acc = acc / len(dataset_test)
     avg_loss = total_loss / len(dataloader_train)
-    
+
     # Store metrics
     train_losses.append(avg_loss)
     val_accuracies.append(val_acc)
-    
+
     print(f'Epoch {n+1}/{nb_epochs}, Loss: {avg_loss:.4f}, Accuracy: {val_acc:.4f}')
-    
+
 
 # Save the model checkpoint
 torch.save({
