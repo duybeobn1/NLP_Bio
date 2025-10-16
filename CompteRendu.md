@@ -32,6 +32,7 @@
   - À chaque pas de temps, le vecteur du mot et l’état caché précédent sont concaténés et transformés par une couche linéaire suivie d’une tangente hyperbolique.
 - Cependant, sans normalisation, ni régularisation, ni connexion résiduelle, cette architecture s’est montrée instable : 
   - La loss chutait rapidement sur le jeu d’entraînement, mais l’accuracy de validation restait bloquée autour de **34 %**. Cet valeur est actuellement le modèle qui prédit “joy” en permanence (la classe plus frequent dans le dataset). Autrement dit, le réseau n’apprenait rien , et se contentait d’un biais statistique sur la distribution des classes. 
+
 #### Custom RNN
 - Donc nous avons intégré trois améliorations majeures : 
   - **Layer Normalization (nn.LayerNorm)** : Stabilise les activations internes et réduit la variance des gradients entre les pas de temps. Empêche les explosions de valeurs cachées. 
@@ -102,8 +103,7 @@ Chaque classe contient 572 phrases, ce qui donne un total de 3 432 phrases équi
 - Pour notre modèle, le choix 128–128 donne les meilleurs résultats. Nous avons trouvé que : quand la taille de l’embedding et hidden layer sont egaux, la transmission des informations entre les deux couches est plus simple et cohérente. Le réseau garde mieux les informations importantes sans les perdre ni les compresser. Aussi, le modèle apprend plus rapide, reste plus stable et capture mieux les relations entre les mots. C’est pour cette raison que la configuration (128, 128) a obtenu la meilleure précision sur le jeu de validation (65,4 %).
 
 ### Conclusion
-- La configuration (128, 128) représente un bon équilibre entre la complexité du modèle et la taille du jeu de données. Elle permet au RNN d’apprendre efficacement les caractéristiques sémantiques et émotionnelles des phrases, tout en évitant overfitting.
-
+- La configuration (128, 128) représente un bon équilibre entre la complexité du modèle et la taille du jeu de données. Elle permet au RNN d’apprendre efficacement les caractéristiques sémantiques et émotionnelles des phrases, tout en évitant surapprentissage.
 
 ## 3 - Analyse des embeddings : 
 
