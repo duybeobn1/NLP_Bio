@@ -26,6 +26,20 @@
   - PCA et t-SNE
   - Visualisation avec Plotly, affichage du mot au survol
 
+#### RNN Vanilla - version de base
+- La premiere version du modele est construit a partir a structure d’un RNN classique 
+  - Chaque mot est projeté dans un espace d’embedding
+  - À chaque pas de temps, le vecteur du mot et l’état caché précédent sont concaténés et transformés par une couche linéaire suivie d’une tangente hyperbolique.
+- Cependant, sans normalisation, ni régularisation, ni connexion résiduelle, cette architecture s’est montrée instable : 
+  - La loss chutait rapidement sur le jeu d’entraînement, mais l’accuracy de validation restait bloquée autour de **34 %**. Cet valeur est actuellement le modèle qui prédit “joy” en permanence (la classe plus frequent dans le dataset). Autrement dit, le réseau n’apprenait rien , et se contentait d’un biais statistique sur la distribution des classes. 
+#### Custom RNN
+- Donc nous avons intégré trois améliorations majeures : 
+  - **Layer Normalization (nn.LayerNorm)** : Stabilise les activations internes et réduit la variance des gradients entre les pas de temps. Empêche les explosions de valeurs cachées. 
+  - **Dropout (nn.Dropout(0.3))** : Supprime random 30 % des neurones de l’état caché final, forcer le réseau à apprendre des représentations plus robustes, et donc reduit surapprentissage
+  - **Connexion résiduelle** : on combine l’état caché précédent et le nouvel état calculé : $ht​=0.5⋅ht−1​+ht′​$ , et donc facilite la propagation du gradient dans le temps et conserve la mémoire contextuelle des phrases.
+- Grace a ces ameliorations, le modèle est debloque sur une classe dominante (“joy”), l'accurancy sur le jeu de validation montee de environ **35% a 65%**. 
+- Ces résultats confirment que même sans utiliser de cellules complexes (comme LSTM ou GRU), un RNN simple peut atteindre de bonnes performances si on lui applique des techniques modernes de stabilisation et de régularisation.
+
 ## 2 - Choix de la taille d’embedding et du hidden layer : 
 ### Préparation et équilibrage des données
 La distribution des classes n’était pas équilibrée, donc nous avons appliqué une méthode d’undersampling pour obtenir le même nombre d’exemples par classe. 
