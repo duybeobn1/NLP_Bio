@@ -34,7 +34,7 @@ def load_file(file):
 # undersample dataset to balance classes using random sampling
 def undersample_dataset_random(texts, emotions, random_state=42):
     """
-    undersample with random sampling for each class to balance the dataset
+    undersample with random sampling for each class to balance the dataset for training
     """
     random.seed(random_state)
     
@@ -59,6 +59,14 @@ def undersample_dataset_random(texts, emotions, random_state=42):
     return df_balanced['text'].tolist(), df_balanced['emotion'].tolist()
 
 class EmotionDataset(Dataset):
+    """
+    Dataset for emotion classification. Each item is a tuple (text_indices, emotion_label).
+    texts: list of sentences
+    emotions: list of corresponding emotion labels
+    max_len: maximum length for padding/truncating sequences
+    vocab: precomputed Vocab object (optional)
+    classes: precomputed class mapping (optional)
+    """
     def __init__(self, texts, emotions, max_len=20, vocab=None, classes=None):
         self.texts = texts
         self.emotions = emotions
