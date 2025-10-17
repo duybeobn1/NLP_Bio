@@ -133,6 +133,20 @@ Chaque classe contient 572 phrases, ce qui donne un total de 3 432 phrases équi
 - Exemple 1 : utilisation de négation classique. Une distance similaire au vecteur "no" entre "didn't" et "doing".
 - Exemple 2 : utilisation pour distinguer un mot et son contraire : relation observée entre "good" et "bad", entre "Always" et "Never".
 
+## 4 – Analyse des embeddings auto-supervisés
+
+L’apprentissage auto-supervisé visait à prédire un mot masqué dans chaque phrase afin d’évaluer si cette tâche permettait d’obtenir des embeddings plus structurés.
+Les vecteurs appris ont été projetés en 2D par t-SNE, puis analysés par K-Means et DBSCAN pour détecter d’éventuels regroupements sémantiques.
+Les résultats montrent peu de structure globale : les clusters obtenus ne sont pas cohérents sur le plan sémantique, même si quelques petits groupes de mots proches par le sens apparaissent localement.
+Globalement, la représentation reste bruitée et dispersée, probablement en raison du jeu de données limité, de la taille modeste du modèle et d’un contexte d’apprentissage insuffisamment riche.
+
+<p align="center">
+  <img src="./viz_embeddings/plot1.png" alt="t-SNE + KMeans" width="300"/>
+  <img src="./viz_embeddings/plot2.png" alt="t-SNE + DBSCAN" width="300"/>
+</p>
+
+
+
 #### Conclusions :
 - Globalement, ces visualisations donnent une bonne intuition de la façon dont le modèle encode le sens des mots et des relations entre eux. On retrouve bien certaines relations classiques comme la négation, ce qui confirme que le modèle capture des analogies entre mots.
 - Cet exemple illustre l'intéret du part-of-speech tagging (POS-tagging) dans le NLP : notre modèle semble accorder beaucoup d'importance à la classe grammaticale des mots. Avoir des données déjà étiquetées doit permettre d'améliorer et accélérer sensiblement l'apprentissage.
